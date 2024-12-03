@@ -3,12 +3,15 @@ import type { Input } from "../utils/types";
 
 export default async function run({ inputText }: Input) {
   const text = inputText.replaceAll("\n", "");
-  const regex = /mul\((\d+),(\d+)\)/g;
-  const matches = text.matchAll(regex);
 
-  const results = matches.map((m) => +m[1] * +m[2]).toArray();
+  const runInstructions = (text: string) => {
+    const regex = /mul\((\d+),(\d+)\)/g;
+    const matches = text.matchAll(regex);
+    const results = matches.map((m) => +m[1] * +m[2]).toArray();
+    return sum(results);
+  };
 
-  console.log(sum(results));
+  console.log(runInstructions(inputText));
 
   const disabledStuffRegex = /don't\(\).*?(do\(\)|$)/g;
   const disabledText = text.matchAll(disabledStuffRegex);
@@ -17,9 +20,5 @@ export default async function run({ inputText }: Input) {
     text
   );
 
-  const multMatches = enabledText.matchAll(regex);
-
-  const results2 = multMatches.map((m) => +m[1] * +m[2]).toArray();
-
-  console.log(sum(results2));
+  console.log(runInstructions(enabledText));
 }
