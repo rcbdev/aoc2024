@@ -11,7 +11,7 @@ export default async function run({ inputText }: Input) {
     return sum(results);
   };
 
-  console.log(runInstructions(inputText));
+  console.log(runInstructions(text));
 
   const disabledStuffRegex = /don't\(\).*?(do\(\)|$)/g;
   const disabledText = text.matchAll(disabledStuffRegex);
