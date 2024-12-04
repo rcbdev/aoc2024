@@ -6,7 +6,7 @@ export default async function run({ inputText }: Input) {
 
   const runInstructions = (text: string) => {
     const matches = text.matchAll(/mul\((\d+),(\d+)\)/g);
-    const results = matches.map((m) => +m[1] * +m[2]).toArray();
+    const results = matches.map((m) => +m[1] * +m[2]);
     return sum(results);
   };
 
