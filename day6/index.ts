@@ -1,13 +1,15 @@
 import type { Input } from "../utils/types";
+import { isPointInArrays } from "../utils/array";
 
 export default async function run({ inputLines }: Input) {
-  const baseMap = inputLines.map((l) => l.split(""));
-  const locationY = baseMap.findIndex((l) => l.includes("^"));
-  const locationX = baseMap[locationY].indexOf("^");
+  const map = inputLines.map((l) => l.split("").map((x) => x === "#"));
+  const startY = inputLines.findIndex((l) => l.includes("^"));
+  const startX = inputLines[startY].indexOf("^");
+  const isInMap = isPointInArrays(map);
 
-  const walkPath = (map: string[][]) => {
+  const walkPath = () => {
     const visited = map.map((l) => l.map(() => 0));
-    let location = [locationY, locationX];
+    let location = [startY, startX];
     let direction = [-1, 0];
 
     while (true) {
@@ -20,16 +22,11 @@ export default async function run({ inputLines }: Input) {
         location[1] + direction[1],
       ];
 
-      if (
-        newLocation[0] < 0 ||
-        newLocation[1] < 0 ||
-        newLocation[0] >= map.length ||
-        newLocation[1] >= map[0].length
-      ) {
+      if (!isInMap(newLocation)) {
         break;
       }
 
-      if (map[newLocation[0]][newLocation[1]] === "#") {
+      if (map[newLocation[0]][newLocation[1]]) {
         direction = [direction[1], -1 * direction[0]];
         continue;
       }
@@ -39,7 +36,7 @@ export default async function run({ inputLines }: Input) {
     return visited;
   };
 
-  const baseMapVisited = walkPath(baseMap);
+  const baseMapVisited = walkPath();
   if (baseMapVisited === null) {
     throw Error("This should not happen");
   }
@@ -52,19 +49,16 @@ export default async function run({ inputLines }: Input) {
 
   let obstructionPositions = 0;
 
-  for (let i = 0; i < baseMap.length; i++) {
-    for (let j = 0; j < baseMap[i].length; j++) {
-      if (baseMap[i][j] !== "." || baseMapVisited[i][j] === 0) {
+  for (let i = 0; i < map.length; i++) {
+    for (let j = 0; j < map[i].length; j++) {
+      if (map[i][j] || baseMapVisited[i][j] === 0) {
         continue;
       }
-      const newMap = baseMap.map((l, y) =>
-        l.map((s, x) => (y === i && x === j ? "#" : s))
-      );
-
-      const result = walkPath(newMap);
-      if (result === null) {
+      map[i][j] = true;
+      if (walkPath() === null) {
         obstructionPositions++;
       }
+      map[i][j] = false;
     }
   }
 
