@@ -39,7 +39,12 @@ export default async function run({ inputLines }: Input) {
     return visited;
   };
 
-  const visitedCount = walkPath(baseMap)?.flatMap((l) =>
+  const baseMapVisited = walkPath(baseMap);
+  if (baseMapVisited === null) {
+    throw Error("This should not happen");
+  }
+
+  const visitedCount = baseMapVisited.flatMap((l) =>
     l.filter((x) => x !== 0)
   ).length;
 
@@ -49,7 +54,7 @@ export default async function run({ inputLines }: Input) {
 
   for (let i = 0; i < baseMap.length; i++) {
     for (let j = 0; j < baseMap[i].length; j++) {
-      if (baseMap[i][j] !== ".") {
+      if (baseMap[i][j] !== "." || baseMapVisited[i][j] === 0) {
         continue;
       }
       const newMap = baseMap.map((l, y) =>
