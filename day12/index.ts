@@ -61,32 +61,32 @@ export default async function run({ inputLines }: Input) {
     let sidesCount = 0;
     let lastSidesIn: number[] = [];
     let lastSidesOut: number[] = [];
+    let thisSidesIn: number[] = [];
+    let thisSidesOut: number[] = [];
+    let inside = false;
+    const checkPoint = (coordStr: string, dist: number) => {
+      const pointHits = coordStrings.includes(coordStr);
+      if (inside && !pointHits) {
+        thisSidesOut.push(dist);
+        if (!lastSidesOut.includes(dist)) {
+          sidesCount++;
+        }
+        inside = false;
+      } else if (!inside && pointHits) {
+        thisSidesIn.push(dist);
+        if (!lastSidesIn.includes(dist)) {
+          sidesCount++;
+        }
+        inside = true;
+      }
+    };
+
     for (let i = minY; i <= maxY; i++) {
-      let inside = false;
-      const thisSidesIn: number[] = [];
-      const thisSidesOut: number[] = [];
-      for (let j = minX; j <= maxX; j++) {
-        const pointHits = coordStrings.includes(pointToString(i, j));
-        if (inside && !pointHits) {
-          thisSidesOut.push(j);
-          if (!lastSidesOut.includes(j)) {
-            sidesCount++;
-          }
-          inside = false;
-        } else if (!inside && pointHits) {
-          thisSidesIn.push(j);
-          if (!lastSidesIn.includes(j)) {
-            sidesCount++;
-          }
-          inside = true;
-        }
-        if (inside && j === maxX) {
-          thisSidesOut.push(j + 1);
-          if (!lastSidesOut.includes(j + 1)) {
-            sidesCount++;
-          }
-          inside = false;
-        }
+      inside = false;
+      thisSidesIn = [];
+      thisSidesOut = [];
+      for (let j = minX; j <= maxX + 1; j++) {
+        checkPoint(pointToString(i, j), j);
       }
       lastSidesIn = thisSidesIn;
       lastSidesOut = thisSidesOut;
@@ -95,31 +95,11 @@ export default async function run({ inputLines }: Input) {
     lastSidesIn = [];
     lastSidesOut = [];
     for (let i = minX; i <= maxX; i++) {
-      let inside = false;
-      const thisSidesIn: number[] = [];
-      const thisSidesOut: number[] = [];
-      for (let j = minY; j <= maxY; j++) {
-        const pointHits = coordStrings.includes(pointToString(j, i));
-        if (inside && !pointHits) {
-          thisSidesOut.push(j);
-          if (!lastSidesOut.includes(j)) {
-            sidesCount++;
-          }
-          inside = false;
-        } else if (!inside && pointHits) {
-          thisSidesIn.push(j);
-          if (!lastSidesIn.includes(j)) {
-            sidesCount++;
-          }
-          inside = true;
-        }
-        if (inside && j === maxY) {
-          thisSidesOut.push(j + 1);
-          if (!lastSidesOut.includes(j + 1)) {
-            sidesCount++;
-          }
-          inside = false;
-        }
+      inside = false;
+      thisSidesIn = [];
+      thisSidesOut = [];
+      for (let j = minY; j <= maxY + 1; j++) {
+        checkPoint(pointToString(j, i), j);
       }
       lastSidesIn = thisSidesIn;
       lastSidesOut = thisSidesOut;
