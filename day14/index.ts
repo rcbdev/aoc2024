@@ -17,8 +17,6 @@ export default async function run({ inputLines }: Input) {
       return {
         p,
         v,
-        x: [] as number[],
-        y: [] as number[],
       };
     });
   const robots = getBots();
@@ -26,8 +24,6 @@ export default async function run({ inputLines }: Input) {
 
   const moveBots = (robots: ReturnType<typeof getBots>, amount = 1) => {
     robots.forEach((r) => {
-      r.x.push(r.p[0]);
-      r.y.push(r.p[1]);
       r.p[0] = (r.p[0] + amount * (r.v[0] + bounds[0])) % bounds[0];
       r.p[1] = (r.p[1] + amount * (r.v[1] + bounds[1])) % bounds[1];
     });
@@ -51,53 +47,38 @@ export default async function run({ inputLines }: Input) {
 
   const treeBots = getBots();
 
-  let i = 0;
   let xLoop: null | [number, number] = null;
   let yLoop: null | [number, number] = null;
-  while (true) {
-    moveBots(treeBots);
-    i++;
-    if (!xLoop) {
-      if (treeBots.every((b) => b.x.includes(b.p[0]))) {
-        for (let j = 0; j < treeBots[0].x.length; j++) {
-          const xs = treeBots
-            .map((r) => r.x[j])
-            .reduce(
-              (rv, curr) => ((rv[curr] = (rv[curr] ?? 0) + 1), rv),
-              {} as Record<number, number>
-            );
-          if (Object.values(xs).some((v) => v > 25)) {
-            xLoop = [i + j, j];
-            break;
-          }
-        }
-      }
+  const maxSteps = Math.max(...bounds);
+  for (let i = 0; i < maxSteps; i++) {
+    const [x, y] = treeBots.reduce(
+      (rv, curr) => {
+        rv[0][curr.p[0]] = (rv[0][curr.p[0]] ?? 0) + 1;
+        rv[1][curr.p[1]] = (rv[1][curr.p[1]] ?? 0) + 1;
+        return rv;
+      },
+      [{}, {}] as Record<number, number>[]
+    );
+    if (!xLoop && Math.max(...Object.values(x)) > 25) {
+      xLoop = [bounds[0], i];
     }
-    if (!yLoop) {
-      if (treeBots.every((b) => b.y.includes(b.p[1]))) {
-        for (let j = 0; j < treeBots[0].y.length; j++) {
-          const ys = treeBots
-            .map((r) => r.y[j])
-            .reduce(
-              (rv, curr) => ((rv[curr] = (rv[curr] ?? 0) + 1), rv),
-              {} as Record<number, number>
-            );
-          if (Object.values(ys).some((v) => v > 25)) {
-            yLoop = [i + j, j];
-            break;
-          }
-        }
-      }
+    if (!yLoop && Math.max(...Object.values(y)) > 25) {
+      yLoop = [bounds[1], i];
     }
     if (xLoop && yLoop) {
       break;
     }
+    moveBots(treeBots);
+  }
+
+  if (!xLoop || !yLoop) {
+    throw new Error("Something broke");
   }
 
   const a = xLoop[1];
-  const b = xLoop[0] - a;
+  const b = xLoop[0];
   const c = yLoop[1];
-  const d = yLoop[0] - c;
+  const d = yLoop[0];
 
   let j = 1;
   while (true) {
