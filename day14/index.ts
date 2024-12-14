@@ -14,7 +14,7 @@ export default async function run({ inputLines }: Input) {
         .split(",")
         .map((x) => +x);
 
-      return { p, v };
+      return { p, v, x: [] as number[], y: [] as number[] };
     });
   const robots = getBots();
   // const bounds = [11, 7];
@@ -28,6 +28,8 @@ export default async function run({ inputLines }: Input) {
       if (map) {
         map[r.p[1]][r.p[0]]--;
       }
+      r.x.push(r.p[0]);
+      r.y.push(r.p[1]);
       r.p[0] = (r.p[0] + r.v[0] + bounds[0]) % bounds[0];
       r.p[1] = (r.p[1] + r.v[1] + bounds[1]) % bounds[1];
       if (map) {
@@ -60,48 +62,59 @@ export default async function run({ inputLines }: Input) {
   }
   console.log(product(quadrants));
 
-  const treeBots = inputLines.map((l) => {
-    const parts = l.split(" ");
-    const p = parts[0]
-      .replace("p=", "")
-      .split(",")
-      .map((x) => +x);
-    const v = parts[1]
-      .replace("v=", "")
-      .split(",")
-      .map((x) => +x);
+  const treeBots = getBots();
 
-    return { p, v };
-  });
-
-  const isTree = async (map: number[][]) => {
-    const output = map
-      .map((l) => l.map((x) => (x > 0 ? "#" : " ")).join(""))
-      .join("\n");
-    console.clear();
-    console.log(output);
-
-    for await (const line of console) {
-      if (line === "y") {
-        return true;
-      }
-      return false;
-    }
-  };
-
-  const map = Array.from({ length: bounds[1] }).map((_, i) =>
-    Array.from({ length: bounds[0] }).map(
-      (_, j) => treeBots.filter((b) => b.p[1] === i && b.p[0] === j).length
-    )
-  );
   let i = 0;
+  let xLoop: null | [number, number] = null;
+  let yLoop: null | [number, number] = null;
   while (true) {
-    if (await isTree(map)) {
+    moveBots(treeBots);
+    i++;
+    if (!xLoop) {
+      const looping = treeBots.filter((b) => b.x.includes(b.p[0]));
+      if (looping.length > treeBots.length / 2) {
+        const xs = looping
+          .map((r) => r.p[0])
+          .reduce(
+            (rv, curr) => ((rv[curr] = (rv[curr] ?? 0) + 1), rv),
+            {} as Record<number, number>
+          );
+        if (Object.values(xs).some((v) => v > 25)) {
+          xLoop = [i, looping[0].x.indexOf(looping[0].p[0])];
+        }
+      }
+    }
+    if (!yLoop) {
+      const looping = treeBots.filter((b) => b.y.includes(b.p[1]));
+      if (looping.length > treeBots.length / 2) {
+        const ys = looping
+          .map((r) => r.p[1])
+          .reduce(
+            (rv, curr) => ((rv[curr] = (rv[curr] ?? 0) + 1), rv),
+            {} as Record<number, number>
+          );
+        if (Object.values(ys).some((v) => v > 25)) {
+          yLoop = [i, looping[0].y.indexOf(looping[0].p[1])];
+        }
+      }
+    }
+    if (xLoop && yLoop) {
       break;
     }
-    moveBots(treeBots, map);
-    i++;
   }
 
-  console.log(i);
+  const a = xLoop[1];
+  const b = xLoop[0] - a;
+  const c = yLoop[1];
+  const d = yLoop[0] - c;
+
+  let j = 1;
+  while (true) {
+    const test = a + j * b;
+    if ((test - c) % d === 0) {
+      console.log(test);
+      break;
+    }
+    j++;
+  }
 }
