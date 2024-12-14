@@ -20,27 +20,16 @@ export default async function run({ inputLines }: Input) {
   // const bounds = [11, 7];
   const bounds = [101, 103];
 
-  const moveBots = (
-    robots: ReturnType<typeof getBots>,
-    map: number[][] | null = null
-  ) => {
+  const moveBots = (robots: ReturnType<typeof getBots>, amount = 1) => {
     robots.forEach((r) => {
-      if (map) {
-        map[r.p[1]][r.p[0]]--;
-      }
       r.x.push(r.p[0]);
       r.y.push(r.p[1]);
-      r.p[0] = (r.p[0] + r.v[0] + bounds[0]) % bounds[0];
-      r.p[1] = (r.p[1] + r.v[1] + bounds[1]) % bounds[1];
-      if (map) {
-        map[r.p[1]][r.p[0]]++;
-      }
+      r.p[0] = (r.p[0] + amount * r.v[0] + amount * bounds[0]) % bounds[0];
+      r.p[1] = (r.p[1] + amount * r.v[1] + amount * bounds[1]) % bounds[1];
     });
   };
 
-  for (let i = 0; i < 100; i++) {
-    moveBots(robots);
-  }
+  moveBots(robots, 100);
 
   const quadrants = [];
   for (let i = 0; i < 2; i++) {
