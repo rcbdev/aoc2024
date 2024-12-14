@@ -50,19 +50,20 @@ export default async function run({ inputLines }: Input) {
   let xLoop: null | [number, number] = null;
   let yLoop: null | [number, number] = null;
   const maxSteps = Math.max(...bounds);
+  const baseArray = <T>(length: number): T[] => new Array(length).fill(0);
   for (let i = 0; i < maxSteps; i++) {
     const [x, y] = treeBots.reduce(
       (rv, curr) => {
-        rv[0][curr.p[0]] = (rv[0][curr.p[0]] ?? 0) + 1;
-        rv[1][curr.p[1]] = (rv[1][curr.p[1]] ?? 0) + 1;
+        rv[0][curr.p[0]]++;
+        rv[1][curr.p[1]]++;
         return rv;
       },
-      [{}, {}] as Record<number, number>[]
+      [baseArray<number>(bounds[0]), baseArray<number>(bounds[1])]
     );
-    if (!xLoop && Math.max(...Object.values(x)) > 25) {
+    if (!xLoop && Math.max(...x) > 25) {
       xLoop = [bounds[0], i];
     }
-    if (!yLoop && Math.max(...Object.values(y)) > 25) {
+    if (!yLoop && Math.max(...y) > 25) {
       yLoop = [bounds[1], i];
     }
     if (xLoop && yLoop) {
