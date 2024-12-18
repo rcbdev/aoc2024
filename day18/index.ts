@@ -21,32 +21,26 @@ export default async function run({ inputLines }: Input) {
   const bytes = inputLines.map((l) => l.split(",").map((x) => +x));
   const { count, size } = actual;
 
-  const coordString = (x: number[]) => `${x[0]}-${x[1]}`;
-
   const walkMap = (obstacleCount = count) => {
-    const obstacles = bytes.slice(0, obstacleCount).map(coordString);
-    const visited = Array.from({ length: size }).map(() =>
+    const map = Array.from({ length: size }).map((_, i) =>
       Array.from({ length: size }).fill(false)
     );
-    const obstacleMap = visited.map((l, i) =>
-      l.map((_, j) => obstacles.includes(coordString([i, j])))
-    );
-    const isInMap = isPointInArrays(visited);
+    bytes.slice(0, obstacleCount).forEach((x) => (map[x[0]][x[1]] = true));
+    const isInMap = isPointInArrays(map);
     const stack = [{ pos: [0, 0], path: [[0, 0]] }];
     let best: null | number[][] = null;
     while (stack.length > 0) {
       const curr = stack.shift()!;
-      if (curr.pos[0] === size - 1 && curr.pos[1] === size - 1) {
-        best = curr.path;
-        break;
-      }
       const next = moves.map((m) => [curr.pos[0] + m[0], curr.pos[1] + m[1]]);
-      const filtered = next.filter(
-        (x) => isInMap(x) && !obstacleMap[x[0]][x[1]] && !visited[x[0]][x[1]]
-      );
-      for (const pos of filtered) {
-        visited[pos[0]][pos[1]] = true;
-        stack.push({ pos, path: [...curr.path, pos] });
+      for (const pos of next) {
+        if (isInMap(pos) && !map[pos[0]][pos[1]]) {
+          if (pos[0] === size - 1 && pos[1] == size - 1) {
+            best = curr.path;
+            break;
+          }
+          map[pos[0]][pos[1]] = true;
+          stack.push({ pos, path: [...curr.path, pos] });
+        }
       }
     }
     return best;
