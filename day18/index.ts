@@ -22,28 +22,27 @@ export default async function run({ inputLines }: Input) {
   const { count, size } = actual;
 
   const walkMap = (obstacleCount = count) => {
-    const map = Array.from({ length: size }).map((_, i) =>
+    const map = Array.from({ length: size }).map(() =>
       Array.from({ length: size }).fill(false)
     );
     bytes.slice(0, obstacleCount).forEach((x) => (map[x[0]][x[1]] = true));
     const isInMap = isPointInArrays(map);
-    const stack = [{ pos: [0, 0], path: [[0, 0]] }];
-    let best: null | number[][] = null;
+    const stack = [[[0, 0]]];
     while (stack.length > 0) {
       const curr = stack.shift()!;
-      const next = moves.map((m) => [curr.pos[0] + m[0], curr.pos[1] + m[1]]);
-      for (const pos of next) {
+      for (const move of moves) {
+        const pos = [curr.at(-1)![0] + move[0], curr.at(-1)![1] + move[1]];
         if (isInMap(pos) && !map[pos[0]][pos[1]]) {
+          const next = curr.concat([pos]);
           if (pos[0] === size - 1 && pos[1] == size - 1) {
-            best = curr.path;
-            break;
+            return next;
           }
           map[pos[0]][pos[1]] = true;
-          stack.push({ pos, path: [...curr.path, pos] });
+          stack.push(next);
         }
       }
     }
-    return best;
+    return null;
   };
 
   const best = walkMap();
