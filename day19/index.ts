@@ -21,10 +21,14 @@ export default async function run({ inputLines }: Input) {
     return result;
   };
 
+  let possiblePatterns = 0;
   let possible = 0;
   for (const pattern of desired) {
-    possible += checkPattern(pattern);
+    const count = checkPattern(pattern);
+    possible += count;
+    possiblePatterns += count > 0 ? 1 : 0;
   }
 
+  console.log(possiblePatterns);
   console.log(possible);
 }
