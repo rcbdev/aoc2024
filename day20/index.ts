@@ -1,4 +1,5 @@
 import { isPointInArrays } from "../utils/array";
+import { sum } from "../utils/math";
 import type { Input } from "../utils/types";
 
 export default async function run({ inputLines }: Input) {
@@ -41,51 +42,18 @@ export default async function run({ inputLines }: Input) {
     pos = next;
   }
 
-  const isInMap = isPointInArrays(map);
+  const findCheats = (time = 2, cheatTarget = 100) => {
+    const cheatByPath = path.map((x, i) => {
+      const possible = path.filter((y, j) => {
+        const dist = Math.abs(x[0] - y[0]) + Math.abs(x[1] - y[1]);
+        return j - i - dist >= cheatTarget && dist <= time;
+      });
 
-  const findCheats = (time = 2) => {
-    return path.flatMap((x, i) => {
-      const saves = [];
-      const before = coordString(x);
-      const seen = [before];
-
-      let options = directions.map((d) => [d[0] + x[0], d[1] + x[1]]);
-      options.forEach((x) => seen.push(coordString(x)));
-      const maxCheat = Math.min(path.length - i - 2, time);
-      for (let i = 1; i < maxCheat; i++) {
-        if (options.length === 0) {
-          break;
-        }
-        const nextOptions = [];
-        for (const d2 of directions) {
-          for (const option of options) {
-            const double = [d2[0] + option[0], d2[1] + option[1]];
-            const doubleStr = coordString(double);
-            if (seen.includes(doubleStr)) {
-              continue;
-            }
-            if (!isInMap(double)) {
-              continue;
-            }
-            seen.push(doubleStr);
-            nextOptions.push(double);
-            if (!pathCheck.includes(doubleStr)) {
-              continue;
-            }
-            const save =
-              pathCheck.indexOf(doubleStr) - pathCheck.indexOf(before) - i - 1;
-            if (save >= 0) {
-              saves.push(save);
-            }
-          }
-        }
-        options = nextOptions;
-      }
-
-      return saves;
+      return possible.length;
     });
+    return sum(cheatByPath);
   };
 
-  console.log(findCheats().filter((x) => x >= 100).length);
-  console.log(findCheats(20).filter((x) => x >= 100).length);
+  console.log(findCheats());
+  console.log(findCheats(20, 100));
 }
