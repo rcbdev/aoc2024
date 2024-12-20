@@ -43,15 +43,17 @@ export default async function run({ inputLines }: Input) {
   }
 
   const findCheats = (time = 2, cheatTarget = 100) => {
-    const cheatByPath = path.map((x, i) => {
+    return path.reduce((rv, x, i) => {
       const possible = path.filter((y, j) => {
+        if (j <= i) {
+          return false;
+        }
         const dist = Math.abs(x[0] - y[0]) + Math.abs(x[1] - y[1]);
         return j - i - dist >= cheatTarget && dist <= time;
       });
 
-      return possible.length;
-    });
-    return sum(cheatByPath);
+      return rv + possible.length;
+    }, 0);
   };
 
   console.log(findCheats());
