@@ -41,12 +41,15 @@ export default async function run({ inputLines }: Input) {
   }
 
   const findCheats = (time = 2, cheatTarget = 100) => {
-    return path.flatMap((x, i) =>
-      path.slice(i + cheatTarget).filter((y, j) => {
-        const dist = Math.abs(x[0] - y[0]) + Math.abs(x[1] - y[1]);
-        return j >= dist && dist <= time;
-      })
-    ).length;
+    return sum(
+      path.map(
+        (x, i) =>
+          path.slice(i + cheatTarget).filter((y, j) => {
+            const dist = Math.abs(x[0] - y[0]) + Math.abs(x[1] - y[1]);
+            return j >= dist && dist <= time;
+          }).length
+      )
+    );
   };
 
   console.log(findCheats());
