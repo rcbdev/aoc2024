@@ -27,18 +27,16 @@ export default async function run({ inputLines }: Input) {
     })
   );
 
-  const coordString = (x: number[]) => `${x[0]},${x[1]}`;
-
   let pos = start;
   path.push(pos);
-  pathCheck.push(coordString(pos));
+  let back = [0, 0];
   while (pos[0] !== end[0] || pos[1] !== end[1]) {
-    const next = directions
-      .map((d) => [pos[0] + d[0], pos[1] + d[1]])
-      .filter((x) => map[x[0]][x[1]] !== "#")
-      .find((x) => !pathCheck.includes(coordString(x)))!;
+    const [next, d] = directions
+      .filter((d) => d[0] !== back[0] || d[1] !== back[1])
+      .map((d) => [[pos[0] + d[0], pos[1] + d[1]], d])
+      .find((x) => map[x[0][0]][x[0][1]] !== "#")!;
     path.push(next);
-    pathCheck.push(coordString(next));
+    back = [d[0] * -1, d[1] * -1];
     pos = next;
   }
 
