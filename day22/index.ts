@@ -2,27 +2,27 @@ import { sum } from "../utils/math";
 import type { Input } from "../utils/types";
 
 export default async function run({ inputLines }: Input) {
-  const startingNumbers = inputLines.map((l) => BigInt(+l));
+  const startingNumbers = inputLines.map((l) => +l);
 
-  const changeSequences = new Map<string, Map<number, bigint>>();
+  const changeSequences = new Map<string, Map<number, number>>();
 
-  const sequencer = (secret: bigint) => {
-    const mult64 = secret * 64n;
-    const step1 = (secret ^ mult64) % 16777216n;
-    const div32 = step1 / 32n;
-    const step2 = (step1 ^ div32) % 16777216n;
-    const mult2048 = step2 * 2048n;
-    const step3 = (step2 ^ mult2048) % 16777216n;
+  const sequencer = (secret: number) => {
+    const mult64 = secret * 64;
+    const step1 = secret ^ mult64 % 16777216;
+    const div32 = step1 / 32;
+    const step2 = step1 ^ div32;
+    const mult2048 = step2 * 2048;
+    const step3 = step2 ^ mult2048 % 16777216;
     return step3;
   };
 
-  const runForSteps = (steps: number) => (number: bigint, idx: number) => {
+  const runForSteps = (steps: number) => (number: number, idx: number) => {
     let num = number;
-    const diffs: bigint[] = [];
+    const diffs: number[] = [];
     for (let i = 0; i < steps; i++) {
       const next = sequencer(num);
-      const price = next % 10n;
-      const lastPrice = num % 10n;
+      const price = next % 10;
+      const lastPrice = num % 10;
       diffs.push(price - lastPrice);
       if (diffs.length > 4) {
         diffs.shift();
@@ -43,11 +43,11 @@ export default async function run({ inputLines }: Input) {
   };
 
   const after2000 = startingNumbers.map(runForSteps(2000));
-  console.log(sum(after2000.map((x) => Number(x))));
+  console.log(sum(after2000));
 
   const sequenceValues = changeSequences
     .entries()
-    .map(([k, v]) => [k, sum(v.values().map((x) => Number(x)))] as const)
+    .map(([k, v]) => [k, sum(v.values())] as const)
     .toArray();
   const best = sequenceValues.sort((a, b) => b[1] - a[1])[0];
   console.log(best);
