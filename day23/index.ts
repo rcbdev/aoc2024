@@ -10,7 +10,7 @@ export default async function run({ inputLines }: Input) {
   });
 
   const triples = new Set<string>();
-  const allConnections = new Set<string>();
+  let biggest: string[] = [];
 
   Object.entries(computers).forEach(([com, conn]) => {
     const connectedTo = [...conn];
@@ -18,27 +18,22 @@ export default async function run({ inputLines }: Input) {
       const next = connectedTo.pop()!;
       const shared = connectedTo.filter((c) => computers[next].includes(c));
       for (const third of shared) {
-        const triple = [com, next, third].sort().join();
-        triples.add(triple);
+        const machines = [com, next, third];
+        if (machines.some((m) => m.startsWith("t"))) {
+          const triple = machines.sort().join();
+          triples.add(triple);
+        }
       }
       const allShare = shared.filter((x) =>
         shared.every((y) => x === y || computers[x].includes(y))
       );
-      const all = [com, next, ...allShare].sort().join();
-      allConnections.add(all);
+      const all = [com, next, ...allShare];
+      if (all.length > biggest.length) {
+        biggest = all;
+      }
     }
   });
 
-  const withT = triples
-    .values()
-    .filter((v) => v.split(",").some((x) => x.startsWith("t")))
-    .toArray();
-  console.log(withT.length);
-
-  console.log(
-    allConnections
-      .values()
-      .toArray()
-      .sort((a, b) => b.length - a.length)[0]
-  );
+  console.log(triples.values().toArray().length);
+  console.log(biggest.sort().join());
 }
